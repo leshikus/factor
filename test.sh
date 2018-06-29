@@ -2,13 +2,14 @@
 
 testg() {
     echo "$2"
-    time sh -c "echo $2 | python3 game.py > res.txt"
-    r=`tail -1 res.txt`
+    time sh -c "echo $2 | python3 factor.py > res$PPID.txt"
+    r=`tail -1 res$PPID.txt`
     test "X$r" = "X$1" || echo "$r" != "$1"
 }
 
 testg 3 72
 testg 8 1099511627776
+testg 4 1084799786894551729
 testg 9 72000000
 testg 3 127381
 testg 17 1067501404569600000
