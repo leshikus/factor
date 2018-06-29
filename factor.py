@@ -95,7 +95,7 @@ def get_next_list_factors():
     if debug:
         print('new factors', ssum, list_factors[ssum], len(list_factors[ssum]))
 
-def get_4_list_factors():
+def get_list_factors():
     global L, list_factors, sums
 
     sums = {}
@@ -119,8 +119,6 @@ def get_4_list_factors():
         ff.append(t)
 
     list_factors = [0, f, ff]
-    get_next_list_factors()
-    get_next_list_factors()
 
 def is_divisor(t):
     global alpha, L
@@ -128,38 +126,14 @@ def is_divisor(t):
         if alpha[i] < t[i]: return False
     return True
 
-def set_sums(t, n):
-    global sums
-    if t in sums and sums[t] > n: return
-    if debug: print('sums', t, n)
-    sums[t] = n
+def record_best(r):
+    global best
 
-def enumerate_sums(cur, sindex, ssum, nf):
-    global list_factors, L, MAX_SUM
-    global debug
-
-    if debug:
-        print('enumerate_sums', cur, sindex, ssum, nf)
-
-    lf = list_factors[ssum]
-    f = lf[sindex]
-
-    sindex_next = sindex + 1
-    ssum_next = ssum
-
-    cur_next = tuple(cur[i] + f[i] for i in range(L))
-    if sindex_next == len(lf):
-        sindex_next = 0
-        ssum_next = ssum + 1
-        if ssum_next > MAX_SUM:
-            if is_divisor(cur_next): set_sums(cur_next, nf + 1)
-            return
-
-    if is_divisor(cur_next):
-        set_sums(cur_next, nf + 1)
-        enumerate_sums(cur_next, sindex_next, ssum_next, nf + 1)
-
-    enumerate_sums(cur, sindex_next, ssum_next, nf)
+    if best < r:
+        best = r
+        if debug:
+           print('best', len(debug_stack))
+           best_stack = list(debug_stack)
 
 def optimize(cur, scur, sindex, ssum, nf):
     global alpha, best, list_factors
@@ -169,13 +143,7 @@ def optimize(cur, scur, sindex, ssum, nf):
         print('optimize', cur, scur, sindex, ssum, nf)
         print('stack', len(debug_stack), debug_stack)
 
-    if scur in sums:
-        r = sums[scur] + nf
-        if best < r:
-            print('best', len(debug_stack), debug_stack.append(cur))
-            best_stack = list(debug_stack)
-
-    if scur < ssum:
+    if scur < ssum * max(1, best + 1 - nf):
         return
 
     lf = list_factors[ssum]
@@ -184,22 +152,12 @@ def optimize(cur, scur, sindex, ssum, nf):
             tf = lf[ti]
 
             if cur == tf:
-                r = nf + 1
-                if best < r:
-                    best = r
-                    if debug:
-                        print('best', len(debug_stack), debug_stack.append(cur))
-                        best_stack = list(debug_stack)
+                record_best(nf + 1)
                 return
         return
 
     if scur < ssum * 2:
-        r = nf + 1
-        if best < r:
-            best = r
-            if debug:
-                print('best', len(debug_stack), debug_stack.append(cur))
-                best_stack = list(debug_stack)
+        record_best(nf + 1)
         return
 
     f = lf[sindex]
@@ -231,15 +189,13 @@ best = get_best()
 debug = True
 debug_stack = []
 best_stack = []
-MAX_SUM = 3
 
 if L < 2:
     print(n_uniq_primes + best)
 else:
     sys.setrecursionlimit(20000)
     get_4_list_factors()
-    enumerate_sums(tuple([0] * L), 0, 1, 0)
-    optimize(alpha, sum(alpha), 0, MAX_SUM + 1, 0)
+    optimize(alpha, sum(alpha), 0, 1, 0)
     if debug: print('best', best, best_stack)
     print(n_uniq_primes + best)
 
