@@ -101,7 +101,7 @@ def a_minus(a, b):
     return tuple(r)
 
 debug_stack = []
-# debug_stack = None # comment this to debug
+debug_stack = None # comment this to debug
 best_stack = []
 
 #print(alpha, salpha)
